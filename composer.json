@@ -2,6 +2,7 @@
     "name": "villermen/image-processing",
     "description": "Library for processing and storing images from external sources.",
     "type": "library",
+    "license": "MIT",
     "require": {
         "php": ">=5.6",
         "villermen/data-handling": "^1.0",
