@@ -3,9 +3,12 @@ version: 2
 jobs:
     build:
         docker:
-            - image: circleci/php:5.6
+            - image: circleci/php:7.1
 
         steps:
+            - run: sudo apt-get -y update && sudo apt-get -y install libpng12-dev libjpeg62-turbo-dev gifsicle
+            - run: sudo docker-php-ext-install gd exif
+
             - checkout
 
             # Download and cache dependencies
