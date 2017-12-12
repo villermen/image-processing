@@ -7,7 +7,7 @@ jobs:
 
         steps:
             - run: sudo apt-get -y update && sudo apt-get -y install libpng12-dev libjpeg62-turbo-dev gifsicle
-            - run: sudo docker-php-ext-install gd exif
+            - run: sudo docker-php-ext-configure gd --with-jpeg-dir=/usr/include/ && sudo docker-php-ext-install gd exif
 
             - checkout
 
