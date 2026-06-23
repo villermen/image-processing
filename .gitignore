@@ -2,3 +2,4 @@
 composer.lock
 /.idea/
 /test/out/
+/.phpunit.cache/

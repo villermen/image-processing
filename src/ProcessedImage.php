@@ -8,15 +8,15 @@ use BrianMcdo\ImagePalette\Color;
 class ProcessedImage
 {
     /** @var string[] */
-    private $fileNames = [];
+    private array $fileNames = [];
 
     /** @var Color[] Colors in order or occurrence. */
-    private $colors = [];
+    private array $colors = [];
 
     /**
      * @return string[]
      */
-    public function getFileNames()
+    public function getFileNames(): array
     {
         return $this->fileNames;
     }
@@ -25,7 +25,7 @@ class ProcessedImage
      * @param string $fileName
      * @param string $suffix
      */
-    public function addFileName($fileName, $suffix)
+    public function addFileName(string $fileName, string $suffix): void
     {
         $this->fileNames[$suffix] = $fileName;
     }
@@ -33,16 +33,12 @@ class ProcessedImage
     /**
      * @return Color[]
      */
-    public function getColors()
+    public function getColors(): array
     {
         return $this->colors;
     }
 
-    /**
-     * @param Color[] $colors
-     * @return ProcessedImage
-     */
-    public function setColors($colors)
+    public function setColors(array $colors): self
     {
         $this->colors = $colors;
         return $this;

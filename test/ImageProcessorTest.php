@@ -1,20 +1,24 @@
 <?php
 
+namespace Test;
+
+use PHPUnit\Framework\TestCase;
 use Villermen\ImageProcessing\ColorProcessor;
 use Villermen\ImageProcessing\ImageProcessor;
 use BrianMcdo\ImagePalette\Color;
 
-class ImageProcessorTest extends PHPUnit_Framework_TestCase
+class ImageProcessorTest extends TestCase
 {
-    /** @var ImageProcessor */
-    private $imageProcessor;
+    private readonly ImageProcessor $imageProcessor;
 
-    public function setUp()
+    public function setUp(): void
     {
+        parent::setUp();
+
         $this->imageProcessor = new ImageProcessor(sys_get_temp_dir());
     }
 
-    public function testProcess()
+    public function testProcess(): void
     {
         $outputDirectory = "test/out/";
 
@@ -92,10 +96,10 @@ class ImageProcessorTest extends PHPUnit_Framework_TestCase
         self::assertFileExists($outputDirectory."png-image-2-thumb.png");
         self::assertFileExists($outputDirectory."png-image-2-large.png");
 
-        echo "\nManual verification of images in \"{$outputDirectory}\" is recommended.\n";
+        $this->markTestIncomplete(sprintf('Manual verification of images in "%s" is recommended.', $outputDirectory));
     }
 
-    public function testSizes()
+    public function testSizes(): void
     {
         $this->imageProcessor->setSizes([
             "thumb" => 300,

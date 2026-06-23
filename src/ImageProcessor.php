@@ -4,48 +4,41 @@ namespace Villermen\ImageProcessing;
 
 use Villermen\DataHandling\DataHandling;
 use Symfony\Component\Process\Process;
+use Villermen\DataHandling\DataHandlingException;
 
 class ImageProcessor
 {
-    const OUTPUT_TYPE_JPEG = "jpg";
-    const OUTPUT_TYPE_PNG = "png";
-    const OUTPUT_TYPE_GIF = "gif";
-    const OUTPUT_TYPE_ORIGINAL = "original";
-    const OUTPUT_TYPES = [
+    public const string OUTPUT_TYPE_JPEG = "jpg";
+    public const string OUTPUT_TYPE_PNG = "png";
+    public const string OUTPUT_TYPE_GIF = "gif";
+    public const string OUTPUT_TYPE_ORIGINAL = "original";
+    /** @var string[] */
+    public const array OUTPUT_TYPES = [
         self::OUTPUT_TYPE_JPEG, self::OUTPUT_TYPE_PNG, self::OUTPUT_TYPE_GIF, self::OUTPUT_TYPE_ORIGINAL
     ];
 
-    /** @var string */
-    private $outputDirectory;
+    private string $outputDirectory;
 
-    /** @var string */
-    private $temporaryDirectory;
+    private string $temporaryDirectory;
 
     /** @var int[] */
-    private $sizes = [];
+    private array $sizes = [];
 
-    /** @var string */
-    private $outputType = self::OUTPUT_TYPE_JPEG;
+    /** @var value-of<self::OUTPUT_TYPES> */
+    private string $outputType = self::OUTPUT_TYPE_JPEG;
 
-    /** @var ColorProcessor|false */
-    private $colorProcessor = false;
+    private ColorProcessor|false $colorProcessor = false;
 
-    /** @var bool */
-    private $gifsicle = false;
+    private bool $gifsicle = false;
 
-    /** @var bool */
-    private $overwrite = true;
+    private bool $overwrite = true;
 
-    /**
-     * @param string $outputDirectory
-     * @param string|null $temporaryDirectory
-     */
-    public function __construct($outputDirectory, $temporaryDirectory = null)
+    public function __construct(string $outputDirectory, ?string $temporaryDirectory = null)
     {
         $this->setOutputDirectory($outputDirectory);
         $this->setTemporaryDirectory($temporaryDirectory ?: sys_get_temp_dir());
 
-        $gifsicleProcess = new Process("gifsicle --help");
+        $gifsicleProcess = new Process(["gifsicle", "--help"]);
         $gifsicleProcess->run();
         if ($gifsicleProcess->isSuccessful()) {
             $this->gifsicle = true;
@@ -59,10 +52,9 @@ class ImageProcessor
      *
      * @param string $imageLocation The URL or file path to an image.
      * @param string $imageName Name that will be used to generate the output file path.
-     * @return ProcessedImage
      * @throws ImageProcessorException
      */
-    public function processImage($imageLocation, $imageName)
+    public function processImage(string $imageLocation, string $imageName): ProcessedImage
     {
         if (count($this->sizes) === 0) {
             throw new ImageProcessorException("No sizes defined.", 1);
@@ -138,7 +130,13 @@ class ImageProcessor
             if ($this->gifsicle && $imageType === IMAGETYPE_GIF &&
                 in_array($this->outputType, [self::OUTPUT_TYPE_ORIGINAL, self::OUTPUT_TYPE_GIF])
             ) {
-                $gifsicleResize = new Process(sprintf("gifsicle --resize-fit %1\$sx%1\$s --optimize=2 %2\$s --output %3\$s", $size, $imageFilePath, $outputFilePath));
+                $gifsicleResize = new Process([
+                    "gifsicle",
+                    sprintf('--resize-fit %1$sx%1$s', $size),
+                    '--optimize=2',
+                    $imageFilePath,
+                    sprintf('--output %s', $outputFilePath),
+                ]);
                 $gifsicleResize->run();
 
                 if (!$gifsicleResize->isSuccessful()) {
@@ -210,16 +208,15 @@ class ImageProcessor
     /**
      * @return int[]
      */
-    public function getSizes()
+    public function getSizes(): array
     {
         return $this->sizes;
     }
 
     /**
      * @param int[] $sizes Sizes in pixels. Keys can be set to image suffixes for that size.
-     * @return ImageProcessor
      */
-    public function setSizes($sizes)
+    public function setSizes(array $sizes): self
     {
         $parsedSizes = [];
         foreach($sizes as $suffix => $size) {
@@ -235,39 +232,28 @@ class ImageProcessor
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getOutputDirectory()
+    public function getOutputDirectory(): string
     {
         return $this->outputDirectory;
     }
 
-    /**
-     * @param string $outputDirectory
-     * @return ImageProcessor
-     */
-    public function setOutputDirectory($outputDirectory)
+    public function setOutputDirectory(string $outputDirectory): self
     {
         $this->outputDirectory = rtrim(trim($outputDirectory), "/")."/";
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getOutputType()
+    public function getOutputType(): string
     {
         return $this->outputType;
     }
 
     /**
-     * @param string $type
-     * @return ImageProcessor
-     * @throws \Villermen\DataHandling\DataHandlingException
+     * @param value-of<self::OUTPUT_TYPES> $type
+     * @throws DataHandlingException
      */
-    public function setOutputType($type)
+    public function setOutputType(string $type): self
     {
         DataHandling::validateInArray($type, self::OUTPUT_TYPES);
 
@@ -276,38 +262,24 @@ class ImageProcessor
         return $this;
     }
 
-    /**
-     * @return ColorProcessor|false
-     */
-    public function getColorProcessor()
+    public function getColorProcessor(): ColorProcessor|false
     {
         return $this->colorProcessor;
     }
 
-    /**
-     * @param ColorProcessor|false $colorProcessor
-     * @return ImageProcessor
-     */
-    public function setColorProcessor($colorProcessor)
+    public function setColorProcessor(ColorProcessor|false $colorProcessor): self
     {
         $this->colorProcessor = $colorProcessor;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getTemporaryDirectory()
+    public function getTemporaryDirectory(): string
     {
         return $this->temporaryDirectory;
     }
 
-    /**
-     * @param string $temporaryDirectory
-     * @return ImageProcessor
-     */
-    public function setTemporaryDirectory($temporaryDirectory)
+    public function setTemporaryDirectory(string $temporaryDirectory): self
     {
         $this->temporaryDirectory = rtrim(trim($temporaryDirectory), "/")."/";
 
@@ -317,11 +289,9 @@ class ImageProcessor
     /**
      * Copies the given file to a temporary file and returns its path.
      *
-     * @param $imageLocation
-     * @return string
      * @throws ImageProcessorException
      */
-    private function makeTemporaryFile($imageLocation)
+    private function makeTemporaryFile(string $imageLocation): string
     {
         $imageFile = @fopen($imageLocation, "r");
 
@@ -354,20 +324,12 @@ class ImageProcessor
         return $temporaryFilePath;
     }
 
-    /**
-     * @return bool
-     */
-    public function isOverwrite()
+    public function isOverwrite(): bool
     {
         return $this->overwrite;
     }
 
-    /**
-     * @param bool $overwrite
-     *
-     * @return ImageProcessor
-     */
-    public function setOverwrite($overwrite)
+    public function setOverwrite(bool $overwrite): self
     {
         $this->overwrite = $overwrite;
 

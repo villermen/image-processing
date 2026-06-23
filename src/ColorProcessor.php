@@ -18,11 +18,10 @@ class ColorProcessor extends ImagePalette
     const SAMPLE_RATE = 10;
     const COLOR_PERCENTAGE_MATCH_THRESHOLD = 0.25;
 
-    /** @noinspection PhpMissingParentConstructorInspection */
     /**
-     * @param int[] $colorWhitelist An array of color integers. (E.g.: 0x00FF00). A default set of colors will be used if left unspecified.
+     * @param int[]|null $colorWhitelist An array of color integers. (E.g.: 0x00FF00). A default set of colors will be used if left unspecified.
      */
-    public function __construct($colorWhitelist = null)
+    public function __construct(?array $colorWhitelist = null)
     {
         $this->precision = self::SAMPLE_RATE;
         $this->paletteLength = 5;
@@ -39,7 +38,7 @@ class ColorProcessor extends ImagePalette
      * @param resource $image A GD image resource.
      * @return Color[]
      */
-    public function processColors($image)
+    public function processColors($image): array
     {
         $this->whiteList = array_fill_keys(array_keys($this->whiteList), 0);
 
@@ -76,20 +75,19 @@ class ColorProcessor extends ImagePalette
 
     /**
      * @param int[] $colorWhitelist An array of color integers. (E.g.: 0x00FF00).
-     * @return ColorProcessor
      */
-    public function setColorWhitelist($colorWhitelist)
+    public function setColorWhitelist(array $colorWhitelist): self
     {
         $this->whiteList = array_fill_keys($colorWhitelist, 0);
 
         return $this;
     }
 
-    /** @noinspection PhpSignatureMismatchDuringInheritanceInspection */
     /**
      * @return int[]
      */
-    public function getColorWhitelist() {
+    public function getColorWhitelist(): array
+    {
         return array_keys($this->whiteList);
     }
 }
