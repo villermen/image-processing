@@ -1,28 +1,19 @@
-version: 2
-
+version: 2.1
 jobs:
     build:
         docker:
             - image: cimg/php:8.3
-
         steps:
-            - run: sudo apt-get -y update && sudo apt-get -y install libpng12-dev libjpeg62-turbo-dev gifsicle
-            - run: sudo docker-php-ext-configure gd --with-jpeg-dir=/usr/include/ && sudo docker-php-ext-install gd exif
-
             - checkout
-
             # Download and cache dependencies
             - restore_cache:
                 keys:
                 - v1-dependencies-{{ checksum "composer.json" }}
                 # fallback to using the latest cache if no exact match is found
                 - v1-dependencies-
-
             - run: composer install --no-interaction
-
             - save_cache:
                 paths:
                     - vendor
                 key: v1-dependencies-{{ checksum "composer.json" }}
-
-            - run: vendor/bin/phpunit test/
+            - run: vendor/bin/phpunit
